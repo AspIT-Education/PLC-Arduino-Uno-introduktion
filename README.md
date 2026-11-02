@@ -50,3 +50,4 @@ Når du henter dette template-repository, vil der automatisk blive genereret en 
 - [Opgave 4: Opret Ladder Diagram](https://github.com/AspIT-Education/PLC-Arduino-Uno-introduktion/issues/4)
 - [Opgave 5: Kør debug funktionen](https://github.com/AspIT-Education/PLC-Arduino-Uno-introduktion/issues/5)
 - [Opgave 6: Lav Arduino opsætning (tænd LED pærer)](https://github.com/AspIT-Education/PLC-Arduino-Uno-introduktion/issues/6)
+- [Opgave 7: Map dine PINs (tænd LED pærer)](https://github.com/AspIT-Education/PLC-Arduino-Uno-introduktion/issues/7)
