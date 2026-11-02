@@ -1,0 +1,80 @@
+name: Valider lukning af opgave
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tjek opgavens krav baseret på labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const issueAuthor = issue.user.login;
+            const issueNumber = issue.number;
+            const labels = issue.labels.map(l => l.name);
+
+            let errorMessage = "";
+
+            // Hent alle kommentarer på opgaven (bruges til image og question)
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+
+            // 1. TJEK FOR LABEL: "image" (Kræver billede i en kommentar)
+            if (labels.includes("image")) {
+              const hasImageComment = comments.data.some(c => 
+                c.user.login === issueAuthor && (c.body.includes("![") || c.body.includes("<img"))
+              );
+
+              if (!hasImageComment) {
+                errorMessage = "⚠️ **Hov!** Du mangler at uploade et **billede** i en kommentar, før du kan lukke opgaven.";
+              }
+            }
+
+            // 2. TJEK FOR LABEL: "question" (Kræver tekstkommentar)
+            else if (labels.includes("question")) {
+              const hasAuthorComment = comments.data.some(c => c.user.login === issueAuthor);
+
+              if (!hasAuthorComment) {
+                errorMessage = "⚠️ **Hov!** Du mangler at **svare** på spørgsmålene i en kommentar, før du kan lukke opgaven.";
+              }
+            }
+
+            // 3. TJEK FOR LABEL: "checklist" (Kræver at alle tjekpunkter [ ] i brødteksten er krydset af [x])
+            else if (labels.includes("checklist")) {
+              const body = issue.body || "";
+              
+              // Tjek om der findes et uafkrydsetfelt '[ ]' i teksten
+              const hasUncheckedItems = body.includes("[ ]");
+
+              if (hasUncheckedItems) {
+                errorMessage = "⚠️ **Hov!** Du mangler at afkrydsse **alle punkter** i tjeklisten i opgavebeskrivelsen, før du kan lukke opgaven.";
+              }
+            }
+
+            // HVIS KRAVET IKKE ER OPFYLDT: Genåbn og giv besked
+            if (errorMessage) {
+              console.log("Krav ikke opfyldt! Genåbner issue...");
+
+              // 1. Genåbn opgaven
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                state: 'open'
+              });
+
+              // 2. Skriv advarsel til eleven
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: errorMessage + "\n\n*Opgaven er derfor blevet genåbnet automatisk.*"
+              });
+            }
