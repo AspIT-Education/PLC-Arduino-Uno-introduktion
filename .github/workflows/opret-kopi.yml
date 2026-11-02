@@ -52,10 +52,10 @@ jobs:
           git clone "https://github.com/${{ github.repository }}.git" workspace
           cd workspace
           if [ -d ".github/workflows" ]; then
-            echo "Fjerner workflow-filer før upload..."
-            rm -rf .github/workflows
+            echo "Fjerner kun oprettelses-workflowet, men beholder validering..."
+            rm -f .github/workflows/opret-kopi.yml  # Erstat med navnet på din oprettelses-fil
             git add .github/workflows || true
-            git commit -m "chore: remove assignment generation workflows for students" || true
+            git commit -m "chore: remove setup workflow for student" || true
           fi
           
           git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository_owner }}/${{ steps.vars.outputs.target_name }}.git" HEAD:main --force
