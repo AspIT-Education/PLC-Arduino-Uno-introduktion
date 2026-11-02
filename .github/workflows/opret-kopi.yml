@@ -53,7 +53,7 @@ jobs:
           cd workspace
           if [ -d ".github/workflows" ]; then
             echo "Fjerner kun oprettelses-workflowet, men beholder validering..."
-            rm -f .github/workflows/opret-kopi.yml  # Erstat med navnet på din oprettelses-fil
+            rm -f .github/workflows/opret-kopi.yml
             git add .github/workflows || true
             git commit -m "chore: remove setup workflow for student" || true
           fi
